@@ -4,6 +4,10 @@ import router from './router'
 import store from './store'
 // 导入 vant 组件
 import '@/plugins/vant.js'
+// 导入移动端适配插件
+import 'lib-flexible'
+// 导入全局样式表
+import '@/theme/global.css'
 
 Vue.config.productionTip = false
 

@@ -14,8 +14,11 @@ module.exports = {
     'vue/multi-word-component-names': [
       'warn',
       {
-        ignores: ['Home']
+        ignores: ['Home', 'Header', 'Footer', 'Search']
       }
-    ]
+    ],
+    // 问题：如何忽略标签自闭合检测？
+    // 解决：配置以下代码，同时要在 Setting 搜索并取消勾选 Vetur>Validation:Template，以更好的解决此问题。
+    'vue/no-parsing-error': [2, { 'x-invalid-end-tag': false }]
   }
 }
