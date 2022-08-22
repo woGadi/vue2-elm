@@ -119,7 +119,8 @@ export default {
     async getCateList() {
       const { data: res } = await getCateListAPI()
       this.cateList = res
-      // console.log(this.cateList)
+      // 修改在这！！！----------------------122-123
+      console.log(this.cateList)
     },
     // 获取店家列表
     async getStoreList() {
