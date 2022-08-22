@@ -7,16 +7,16 @@
         <van-swipe-item>
           <!-- 头部九宫格链接 -->
           <van-grid :column-num="4" clickable icon-size="1.2rem">
-            <!-- 循环渲染前8项 -->
-            <van-grid-item v-for="item in cateList.slice(0, cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
+            <!-- 循环渲染后8项 -->
+            <van-grid-item v-for="item in cateList.slice(cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
           </van-grid>
         </van-swipe-item>
         <!-- 轮播的第二页 -->
         <van-swipe-item>
           <!-- 头部九宫格链接 -->
           <van-grid :column-num="4" clickable icon-size="1.2rem">
-            <!-- 循环渲染后8项 -->
-            <van-grid-item v-for="item in cateList.slice(cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
+            <!-- 循环渲染前8项 -->
+            <van-grid-item v-for="item in cateList.slice(0, cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
           </van-grid>
         </van-swipe-item>
       </van-swipe>
@@ -30,12 +30,15 @@
       <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5">
         <!-- 循环渲染列表的每一项 -->
         <van-cell v-for="item in storeList" :key="item.id">
-          <!-- 店家信息分为 -->
+          <!-- 店家信息项 -->
           <div class="store_info">
+            <!-- 店家信息项左侧图片部分 -->
             <div class="store_info_left">
               <img :src="`https://elm.cangdu.org/img/${item.image_path}`" alt="" />
             </div>
+            <!-- 店家信息项右侧文字部分 -->
             <div class="store_info_right">
+              <!-- 文字上部分 div -->
               <div>
                 <span>
                   <van-tag color="#F9CC9D" text-color="#000">
@@ -47,6 +50,7 @@
                   <p>{{ item.supports[0].icon_name }} {{ item.supports[1].icon_name }} 票</p>
                 </span>
               </div>
+              <!-- 文字中部分 div -->
               <div>
                 <span>
                   <van-rate v-model="item.rating" allow-half void-icon="star" color="orange" void-color="#eee" size="12px" gutter="0px" />
@@ -58,6 +62,7 @@
                   <van-tag color="#0063B1" plain>准时达</van-tag>
                 </span>
               </div>
+              <!-- 文字下部分 div -->
               <div>
                 <span>
                   <p>￥20起送 / {{ item.piecewise_agent_fee.tips }}</p>
@@ -114,6 +119,7 @@ export default {
     this.getCateList()
     this.getStoreList()
   },
+  computed: {},
   methods: {
     // 获取食品分类列表
     async getCateList() {
@@ -165,6 +171,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
+@import '@/style/common.less';
 .home-container {
   padding-top: 1.22667rem;
   padding-bottom: 1.33333rem;
@@ -203,98 +210,6 @@ export default {
   }
 }
 
-.van-cell {
-  padding: 30px 20px;
-}
-
-.store_info {
-  display: flex;
-  height: 150px;
-  .store_info_left {
-    flex: 2;
-    margin-right: 15px;
-    img {
-      // width: 150px;
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .store_info_right {
-    flex: 7;
-    display: flex;
-    flex-direction: column;
-    div {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      span:first-child {
-        flex: 6;
-        position: relative;
-        height: 52px;
-        p {
-          font-size: 12px;
-          color: #666;
-          // 字体小于 12px
-          transform: scale(0.9);
-        }
-        /* 标签样式 */
-        .van-tag {
-          position: absolute;
-          top: 8px;
-          padding: 0 3px;
-          height: 30px;
-          text-align: center;
-        }
-        h3 {
-          position: absolute;
-          left: 60px;
-          width: 240px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          letter-spacing: 2px;
-        }
-        .van-rate {
-          // position: absolute;
-          // bottom: 3px;
-          float: left;
-          margin-top: 10px;
-          width: 46%;
-        }
-        .rating_p {
-          // left: 130px;
-          // top: 3px;
-          float: left;
-          margin-left: 5px;
-          margin-right: 10px;
-          transform: scale(1);
-          color: orange;
-        }
-      }
-      span:last-child {
-        flex: 4;
-        position: relative;
-        p {
-          position: absolute;
-          right: 0;
-          font-size: 12px;
-          color: #999;
-          transform: scale(0.8);
-        }
-        .van-tag {
-          position: absolute;
-          top: 8px;
-          right: 0;
-          padding: 2px 3px;
-          height: 30px;
-          text-align: center;
-          transform: scale(0.8);
-        }
-        .van-tag:first-child {
-          right: 62px;
-        }
-      }
-    }
-  }
-}
+// 使用店家列表的样式类
+.store-list();
 </style>

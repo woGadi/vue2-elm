@@ -5,7 +5,7 @@ module.exports = defineConfig({
 
 const path = require('path')
 // 注意：这里的路径用 @/ 会报错
-const themePath = path.join(__dirname, './src/theme/theme.less')
+const themePath = path.join(__dirname, './src/style/theme.less')
 
 module.exports = {
   // devServer: {

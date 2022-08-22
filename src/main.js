@@ -7,7 +7,7 @@ import '@/plugins/vant.js'
 // 导入移动端适配插件
 import 'lib-flexible'
 // 导入全局样式表
-import '@/theme/global.css'
+import '@/style/global.less'
 
 Vue.config.productionTip = false
 

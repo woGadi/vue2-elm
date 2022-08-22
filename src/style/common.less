@@ -1,0 +1,97 @@
+// 店家列表的样式类
+.store-list {
+  .van-cell {
+    padding: 30px 20px;
+  }
+
+  .store_info {
+    display: flex;
+    height: 150px;
+    .store_info_left {
+      flex: 2;
+      margin-right: 15px;
+      img {
+        // width: 150px;
+        width: 100%;
+        height: 100%;
+      }
+    }
+    .store_info_right {
+      flex: 7;
+      display: flex;
+      flex-direction: column;
+      div {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        span:first-child {
+          flex: 6;
+          position: relative;
+          height: 52px;
+          p {
+            font-size: 12px;
+            color: #666;
+            // 字体小于 12px
+            transform: scale(0.9);
+          }
+          /* 标签样式 */
+          .van-tag {
+            position: absolute;
+            top: 8px;
+            padding: 0 3px;
+            height: 30px;
+            text-align: center;
+          }
+          h3 {
+            position: absolute;
+            left: 60px;
+            width: 240px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: 2px;
+          }
+          .van-rate {
+            // position: absolute;
+            // bottom: 3px;
+            float: left;
+            margin-top: 10px;
+            width: 46%;
+          }
+          .rating_p {
+            // left: 130px;
+            // top: 3px;
+            float: left;
+            margin-left: 5px;
+            margin-right: 10px;
+            transform: scale(1);
+            color: orange;
+          }
+        }
+        span:last-child {
+          flex: 4;
+          position: relative;
+          p {
+            position: absolute;
+            right: 0;
+            font-size: 12px;
+            color: #999;
+            transform: scale(0.8);
+          }
+          .van-tag {
+            position: absolute;
+            top: 8px;
+            right: 0;
+            padding: 2px 3px;
+            height: 30px;
+            text-align: center;
+            transform: scale(0.8);
+          }
+          .van-tag:first-child {
+            right: 62px;
+          }
+        }
+      }
+    }
+  }
+}

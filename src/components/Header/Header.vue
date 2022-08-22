@@ -8,27 +8,28 @@
     </van-nav-bar>
 
     <!-- 搜索弹出层 -->
-    <van-popup v-model="showSearchPopup" position="top" :style="{ height: '' }" close-on-click-overlay round>
+    <van-popup v-model="$store.state.searchPopup" position="top" :style="{ height: '90%' }" close-on-click-overlay round>
       <Search></Search>
     </van-popup>
   </div>
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import Search from '@/views/Search/Search.vue'
 export default {
   name: 'Header',
   data() {
-    return {
-      showSearchPopup: false
-    }
+    return {}
   },
   components: {
     Search
   },
+  computed: {},
   methods: {
+    ...mapMutations(['showSearchPopup']),
     toSearch() {
-      this.showSearchPopup = true
+      this.showSearchPopup(true)
     }
   }
 }
@@ -36,7 +37,6 @@ export default {
 
 <style lang="less" scoped>
 .van-popup {
-  height: 90%;
   background-color: #eee;
 }
 </style>

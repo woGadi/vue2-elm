@@ -2,18 +2,22 @@
   <div class="search-container">
     <!-- 官方 Tips: 在 van-search 外层增加 form 标签，且 action 不为空，即可在 iOS 输入法中显示搜索按钮。 -->
     <form action="/">
-      <van-search v-model="storeInfoSearch" show-action placeholder="请输入搜索关键词" />
+      <!-- 搜索框 -->
+      <van-search v-model="storeInfoSearch" show-action placeholder="请输入搜索关键词" @cancel="searchPopupClosed" @search="searchStoreList" @clear="clearSearchValue" />
 
       <!-- 搜索展示的店家列表 -->
-      <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5">
+      <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5" :immediate-check="false" v-if="storeList.length !== 0">
         <!-- 循环渲染列表的每一项 -->
         <van-cell v-for="item in storeList" :key="item.id">
-          <!-- 店家信息分为 -->
+          <!-- 店家信息项 -->
           <div class="store_info">
+            <!-- 店家信息项左侧图片部分 -->
             <div class="store_info_left">
               <img :src="`https://elm.cangdu.org/img/${item.image_path}`" alt="" />
             </div>
+            <!-- 店家信息项右侧文字部分 -->
             <div class="store_info_right">
+              <!-- 文字上部分 div -->
               <div>
                 <span>
                   <van-tag color="#F9CC9D" text-color="#000">
@@ -25,6 +29,7 @@
                   <p>{{ item.supports[0].icon_name }} {{ item.supports[1].icon_name }} 票</p>
                 </span>
               </div>
+              <!-- 文字中部分 div -->
               <div>
                 <span>
                   <van-rate v-model="item.rating" allow-half void-icon="star" color="orange" void-color="#eee" size="12px" gutter="0px" />
@@ -36,6 +41,7 @@
                   <van-tag color="#0063B1" plain>准时达</van-tag>
                 </span>
               </div>
+              <!-- 文字下部分 div -->
               <div>
                 <span>
                   <p>￥20起送 / {{ item.piecewise_agent_fee.tips }}</p>
@@ -48,11 +54,15 @@
           </div>
         </van-cell>
       </van-list>
+
+      <!-- 列表为空时，展示列表的空状态 -->
+      <van-empty image="search" description="查找不到店家喔，再找找看~" v-else></van-empty>
     </form>
   </div>
 </template>
 
 <script>
+import { mapState, mapMutations } from 'vuex'
 import { getStoreListAPI } from '@/apis/homeAPI.js'
 export default {
   name: 'Search',
@@ -71,8 +81,10 @@ export default {
         // 跳过的数据条数
         offset: 160,
         // 请求数据的数量
-        limit: 2
+        limit: 6
       },
+      // 请求数据条数总量
+      total: 30,
       // 店家列表数据
       storeList: [],
       // 控制搜索店家列表加载的参数对象
@@ -87,16 +99,21 @@ export default {
   created() {
     this.getStoreList()
   },
+  computed: {
+    ...mapState(['searchPopup'])
+  },
   methods: {
+    ...mapMutations(['showSearchPopup']),
     // 获取店家列表
     async getStoreList() {
       const { data: res } = await getStoreListAPI(this.storeParams)
       // 上拉加载：新数据在后
       this.storeList = [...this.storeList, ...res]
+      console.log(this.storeList)
       // 初始渲染列表完毕时，将允许触发接下来的 load 事件
       this.loadListParams.loading = false
       // 控制加载的总条数为30
-      if (this.storeList.length === 30) {
+      if (this.storeList.length === this.total) {
         // 上拉加载，数据加载完毕了
         this.loadListParams.finished = true
       }
@@ -105,18 +122,82 @@ export default {
     loadStoreList() {
       // 允许触发 load 后，立即防止外界多次触发 load (对外界禁止触发 load 事件)
       this.loadListParams.loading = true
-      // 拿到列表的下2项数据
-      this.storeParams.offset += 2
+      // 拿到列表的下6项数据
+      this.storeParams.offset += 6
       this.getStoreList()
+    },
+    // 监听确认搜索店家列表事件
+    async searchStoreList() {
+      // 判断用户输入内容是否为空
+      if (this.storeInfoSearch.trim() === '') return
+      // 定义搜索结果数组
+      const searchResult = []
+      // 初始化数据，基于所有数据进行搜索
+      this.storeParams.offset = 160
+      this.storeParams.limit = this.total
+      const { data: res } = await getStoreListAPI(this.storeParams)
+      // 拿到列表的每一项
+      res.forEach((item) => {
+        // 判断每一项的 name，是否包含用户键入的值
+        if (item.name.indexOf(this.storeInfoSearch.trim()) !== -1) {
+          // 包含就将这一整项，加入搜索结果数组
+          searchResult.push(item)
+        }
+      })
+      // 格式化搜索框内容
+      this.storeInfoSearch = this.storeInfoSearch.trim()
+      // 将搜索结果数组赋值，以渲染到页面上
+      this.storeList = searchResult
+      // 搜索结束，防止继续触发 loadStoreList 事件
+      this.loadListParams.finished = true
+      console.log(this.storeList)
+    },
+    // 点击搜索框中的清空按钮，初始化列表
+    clearSearchValue() {
+      // 初始化数据
+      this.storeList = []
+      this.storeParams.offset = 160
+      this.storeParams.limit = 6
+      /* 关键一步！
+      以下是猜测 (经测试，以下猜测不成立。。)
+      1. 因为初始化列表 this.storeList = [] 时，列表模型坍塌 (没有高度了)，导致弹出层滚动条触发 load 事件的时机提前 (offset趋于无穷大)；
+      2. 在 this.getStoreList() 中的 this.loadListParams.loading = false 解除了触发限制，所以在列表模型坍塌的一瞬间，多触发了一次 load 事件！
+      3. 感觉，理论上，只要列表加载出来展开的足够慢，load 在这期间会触发多次 */
+      this.loadListParams.loading = true
+      this.loadListParams.finished = false
+      this.getStoreList()
+    },
+    // 监听搜索弹出层的关闭事件
+    searchPopupClosed() {
+      // 初始化列表
+      this.clearSearchValue()
+      this.showSearchPopup(false)
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
+@import '@/style/common.less';
 .home-container {
   padding-top: 1.22667rem;
   padding-bottom: 1.33333rem;
+}
+
+.van-search {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin-bottom: 20px;
+  width: 100%;
+  border-bottom: 1px solid #ddd;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  z-index: 1;
+}
+
+.van-list {
+  margin-top: 130px;
 }
 
 .van-cell {
@@ -125,100 +206,16 @@ export default {
   border-top-right-radius: 15px;
 }
 
-.store_info {
-  display: flex;
-  height: 150px;
-  .store_info_left {
-    flex: 2;
-    margin-right: 15px;
-    img {
-      // width: 150px;
-      width: 100%;
-      height: 100%;
-    }
-  }
-  .store_info_right {
-    flex: 7;
-    display: flex;
-    flex-direction: column;
-    div {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      span:first-child {
-        flex: 6;
-        position: relative;
-        height: 52px;
-        p {
-          font-size: 12px;
-          color: #666;
-          // 字体小于 12px
-          transform: scale(0.9);
-        }
-        /* 标签样式 */
-        .van-tag {
-          position: absolute;
-          top: 8px;
-          padding: 0 3px;
-          height: 30px;
-          text-align: center;
-        }
-        h3 {
-          position: absolute;
-          left: 60px;
-          width: 240px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          letter-spacing: 2px;
-        }
-        .van-rate {
-          // position: absolute;
-          // bottom: 3px;
-          float: left;
-          margin-top: 10px;
-          width: 46%;
-        }
-        .rating_p {
-          // left: 130px;
-          // top: 3px;
-          float: left;
-          margin-left: 5px;
-          margin-right: 10px;
-          transform: scale(1);
-          color: orange;
-        }
-      }
-      span:last-child {
-        flex: 4;
-        position: relative;
-        p {
-          position: absolute;
-          right: 0;
-          font-size: 12px;
-          color: #999;
-          transform: scale(0.8);
-        }
-        .van-tag {
-          position: absolute;
-          top: 8px;
-          right: 0;
-          padding: 2px 3px;
-          height: 30px;
-          text-align: center;
-          transform: scale(0.8);
-        }
-        .van-tag:first-child {
-          right: 62px;
-        }
-      }
-    }
-  }
-}
+// 使用店家列表的样式类
+.store-list();
 
-.van-search {
-  margin-bottom: 20px;
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
+.van-empty {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  transform: translate(0, -50%);
 }
 </style>
