@@ -8,7 +8,7 @@
           <!-- 头部九宫格链接 -->
           <van-grid :column-num="4" clickable icon-size="1.2rem">
             <!-- 循环渲染后8项 -->
-            <van-grid-item v-for="item in cateList.slice(cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
+            <van-grid-item v-for="item in cateList.slice(cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title" to="/category" @click="sendCateTitle(item.title)"></van-grid-item>
           </van-grid>
         </van-swipe-item>
         <!-- 轮播的第二页 -->
@@ -16,7 +16,7 @@
           <!-- 头部九宫格链接 -->
           <van-grid :column-num="4" clickable icon-size="1.2rem">
             <!-- 循环渲染前8项 -->
-            <van-grid-item v-for="item in cateList.slice(0, cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title"></van-grid-item>
+            <van-grid-item v-for="item in cateList.slice(0, cateList.length / 2)" :key="item.id" :icon="`https://fuss10.elemecdn.com/${item.image_url}`" :text="item.title" to="/category" @click="sendCateTitle(item.title)"></van-grid-item>
           </van-grid>
         </van-swipe-item>
       </van-swipe>
@@ -80,6 +80,7 @@
 </template>
 
 <script>
+import { mapMutations } from 'vuex'
 import { getCateListAPI, getStoreListAPI } from '@/apis/homeAPI.js'
 export default {
   name: 'Home',
@@ -118,9 +119,17 @@ export default {
   created() {
     this.getCateList()
     this.getStoreList()
+    this.setSinglePageKey()
+    this.getSinglePageKey()
   },
   computed: {},
   methods: {
+    ...mapMutations(['sendCateTitle', 'getSinglePageKey']),
+    // 设置验证“单页面”身份的键
+    setSinglePageKey() {
+      sessionStorage.removeItem('singlePageKey')
+      sessionStorage.setItem('singlePageKey', 'Home')
+    },
     // 获取食品分类列表
     async getCateList() {
       const { data: res } = await getCateListAPI()
@@ -177,7 +186,7 @@ export default {
   padding-bottom: 1.33333rem;
 }
 
-// 直接 !important 覆盖不生效，用 /deep/
+// !important 覆盖不生效，用 /deep/
 /deep/ .van-swipe__indicators {
   bottom: 5px;
 }

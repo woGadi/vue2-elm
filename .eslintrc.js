@@ -14,7 +14,7 @@ module.exports = {
     'vue/multi-word-component-names': [
       'warn',
       {
-        ignores: ['Home', 'Header', 'Footer', 'Search']
+        ignores: ['Home', 'Header', 'Footer', 'Search', 'Page', 'Category', 'Order']
       }
     ],
     // 问题：如何忽略标签自闭合检测？
