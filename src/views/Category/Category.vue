@@ -3,13 +3,25 @@
     <!-- 公共返回组件 -->
     <HeaderBack></HeaderBack>
 
+    <!-- 公共页面样式组件 -->
+    <CommonPage>
+      <!-- 具名插槽，将内容放到名为 slot-title 的插槽当中 -->
+      <template slot="slot-title">
+        <!-- 最好带一个 div，用于标识是插槽里的样式 -->
+        <div class="slot-title">
+          <p>《美食类型》</p>
+          <h3>{{ cateTitle }}</h3>
+        </div>
+      </template>
+    </CommonPage>
+
     <!-- 标题横幅 -->
-    <div class="banner">
+    <!-- <div class="banner">
       <div class="title">
         <p>《美食类型》</p>
         <h3>{{ cateTitle }}</h3>
       </div>
-    </div>
+    </div> -->
 
     <!-- 美食类型的店家列表 -->
     <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5" :immediate-check="false" v-if="storeList.length !== 0">
@@ -19,7 +31,7 @@
         <div class="store_info">
           <!-- 店家信息项左侧图片部分 -->
           <div class="store_info_left">
-            <img :src="`https://elm.cangdu.org/img/${item.image_path}`" alt="" />
+            <img :src="item.image_path" alt="" />
           </div>
           <!-- 店家信息项右侧文字部分 -->
           <div class="store_info_right">
@@ -64,6 +76,7 @@
 </template>
 
 <script>
+import CommonPage from '@/components/CommonPage/CommonPage.vue'
 import HeaderBack from '@/components/HeaderBack/HeaderBack.vue'
 import { getStoreListAPI } from '@/apis/homeAPI.js'
 export default {
@@ -83,7 +96,7 @@ export default {
         // 跳过的数据条数
         offset: 160,
         // 请求数据的数量
-        limit: 5
+        limit: 6
       },
       // 请求数据条数总量
       total: 30,
@@ -111,7 +124,7 @@ export default {
     async getStoreList() {
       const { data: res } = await getStoreListAPI(this.storeParams)
       // 上拉加载：新数据在后
-      this.storeList = [...this.storeList, ...res]
+      this.storeList = [...this.storeList, ...res.data]
       console.log(this.storeList)
       // 初始渲染列表完毕时，将允许触发接下来的 load 事件
       this.loadListParams.loading = false
@@ -126,12 +139,13 @@ export default {
       // 允许触发 load 后，立即防止外界多次触发 load (对外界禁止触发 load 事件)
       this.loadListParams.loading = true
       // 拿到列表的下5项数据
-      this.storeParams.offset += 5
+      this.storeParams.offset += 6
       this.getStoreList()
     }
   },
   components: {
-    HeaderBack
+    HeaderBack,
+    CommonPage
   }
 }
 </script>
@@ -143,10 +157,25 @@ export default {
   background-color: #eee;
 }
 
-.banner {
-  position: relative;
+.slot-title {
+  p {
+    margin-bottom: 20px;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: 5px;
+  }
+  h3 {
+    font-size: 80px;
+    letter-spacing: 15px;
+  }
+}
+
+/* .banner {
+  position: absolute;
   margin-bottom: 20px;
-  height: 510px;
+  width: 100%;
+  // height: 510px;
+  height: 38%;
   background-color: #0063b1;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
@@ -169,9 +198,13 @@ export default {
       letter-spacing: 15px;
     }
   }
-}
+} */
 
 .van-list {
+  position: absolute;
+  top: 38%;
+  left: 0;
+  width: 100%;
   margin-top: 20px;
 }
 

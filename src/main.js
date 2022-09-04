@@ -9,6 +9,9 @@ import 'lib-flexible'
 // 导入全局样式表
 import '@/style/global.less'
 
+import { reqInterceptorAPI } from '@/apis/authAPI.js'
+reqInterceptorAPI()
+
 Vue.config.productionTip = false
 
 new Vue({

@@ -13,7 +13,7 @@
           <div class="store_info">
             <!-- 店家信息项左侧图片部分 -->
             <div class="store_info_left">
-              <img :src="`https://elm.cangdu.org/img/${item.image_path}`" alt="" />
+              <img :src="item.image_path" alt="" />
             </div>
             <!-- 店家信息项右侧文字部分 -->
             <div class="store_info_right">
@@ -108,7 +108,7 @@ export default {
     async getStoreList() {
       const { data: res } = await getStoreListAPI(this.storeParams)
       // 上拉加载：新数据在后
-      this.storeList = [...this.storeList, ...res]
+      this.storeList = [...this.storeList, ...res.data]
       console.log(this.storeList)
       // 初始渲染列表完毕时，将允许触发接下来的 load 事件
       this.loadListParams.loading = false
@@ -137,7 +137,7 @@ export default {
       this.storeParams.limit = this.total
       const { data: res } = await getStoreListAPI(this.storeParams)
       // 拿到列表的每一项
-      res.forEach((item) => {
+      res.data.forEach((item) => {
         // 判断每一项的 name，是否包含用户键入的值
         if (item.name.indexOf(this.storeInfoSearch.trim()) !== -1) {
           // 包含就将这一整项，加入搜索结果数组
