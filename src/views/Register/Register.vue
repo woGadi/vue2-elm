@@ -28,7 +28,6 @@
             <div class="form-btn">
               <!-- 验证码展示区 -->
               <div class="btn-code">
-                <!-- <img :src="codeImg" alt="" /> -->
                 <Code></Code>
               </div>
               <!-- 登录按钮 -->
@@ -49,7 +48,6 @@
 
 <script>
 import { mapState, mapMutations } from 'vuex'
-// import { setCookie, getCookie } from '@/utils/cookie.js'
 import Code from '@/components/Code/Code.vue'
 import CommonPage from '@/components/CommonPage/CommonPage.vue'
 import HeaderBack from '@/components/HeaderBack/HeaderBack.vue'
@@ -83,15 +81,12 @@ export default {
         ],
         code: [
           { required: true, message: '输入验证码喔', trigger: 'onBlur' },
-          { validator: this.codeValid, message: '请输入 4 位数验证码', trigger: 'onBlur' }
+          { validator: this.codeValid, message: '请输入 4 位数验证码', trigger: 'onBlur' },
+          { validator: this.codeErrorValid, message: '验证码不正确喔' }
         ]
       },
       // 确认注册返回的信息字符串
-      regValidMessage: '',
-      // 验证码图片路径
-      codeImg: '',
-      // 表单校验信息，此对象的属性均为表单每一项的 name 值
-      validInfo: {}
+      regValidMessage: ''
     }
   },
   created() {},
@@ -112,6 +107,12 @@ export default {
     usernameExistValid() {
       if (this.regValidMessage === '用户名已存在') {
         this.regValidMessage = ''
+        return false
+      }
+      return true
+    },
+    codeErrorValid() {
+      if (this.loginForm.code !== this.codeValue) {
         return false
       }
       return true
@@ -148,12 +149,12 @@ export default {
         .then(async () => {
           const { data: res } = await postRegisterInfoAPI(this.registerForm)
           // 判断验证码是否输入正确
-          if (this.registerForm.code !== this.codeValue) {
-            res.data = {}
-            res.meta.msg = '验证码不正确喔'
-            res.meta.status = '400'
-            return console.log(res)
-          }
+          // if (this.registerForm.code !== this.codeValue) {
+          //   res.data = {}
+          //   res.meta.msg = '验证码不正确喔'
+          //   res.meta.status = '400'
+          //   return console.log(res)
+          // }
           // 判断手机号和用户名是否已注册
           this.regValidMessage = res.message
           // 根据响应回来的数据再次校验表单内容
@@ -161,9 +162,8 @@ export default {
           // 注册成功的逻辑
           console.log(res, '注册成功')
           // 注册成功的轻提示
-          this.$toast({
-            message: '注册成功！请登录~',
-            position: 'top'
+          this.$toast.success({
+            message: '注册成功\n请登录~'
           })
           // 注册成功后跳转 (还需在 router.js 中控制访问权限)
           this.$router.push('/login')
@@ -175,18 +175,7 @@ export default {
   },
   computed: {
     // 共享的验证码的值
-    ...mapState(['codeValue']),
-    getValidInfo() {
-      const usernameRef = this.$refs.usernameRef.name
-      const passwordRef = this.$refs.passwordRef.name
-      const codeRef = this.$refs.codeRef.name
-      const validInfo = {
-        usernameRef,
-        passwordRef,
-        codeRef
-      }
-      return validInfo
-    }
+    ...mapState(['codeValue'])
   },
   components: {
     HeaderBack,

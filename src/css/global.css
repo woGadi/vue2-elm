@@ -3,12 +3,13 @@ body {
   height: 100%;
   background-color: #eee;
 }
-
 p {
   margin: 0;
 }
-
 h3 {
   margin: 0;
   font-size: 30px;
+}
+.van-toast__text {
+  letter-spacing: 4px;
 }

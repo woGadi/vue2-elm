@@ -2,7 +2,7 @@ import Vue from 'vue'
 // 导入 vant 样式表
 import 'vant/lib/index.less'
 // 按需导入 vant 组件
-import { Button, NavBar, Icon, Tabbar, TabbarItem, Grid, GridItem, Image, Swipe, SwipeItem, List, Cell, Tag, Rate, PullRefresh, Popup, Search, Empty, Form, Field, Toast } from 'vant'
+import { Button, NavBar, Icon, Tabbar, TabbarItem, Grid, GridItem, Image, Swipe, SwipeItem, List, Cell, Tag, Rate, PullRefresh, Popup, Search, Empty, Form, Field, Toast, Image as VanImage } from 'vant'
 
 Vue.use(Button)
 Vue.use(NavBar)
@@ -25,3 +25,4 @@ Vue.use(Empty)
 Vue.use(Form)
 Vue.use(Field)
 Vue.use(Toast)
+Vue.use(VanImage)

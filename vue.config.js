@@ -12,11 +12,11 @@ module.exports = {
   devServer: {
     //   // // <-- 配置 webSocket 报错的
     host: '127.0.0.1',
-    port: 8081
-    //   // client: {
-    //   //   webSocketURL: 'ws://127.0.0.1:8081/ws'
-    //   //   // webSocketURL: 'ws://0.0.0.0:3000/ws'
-    //   // }
+    port: 8081,
+    client: {
+      webSocketURL: 'ws://127.0.0.1:8081/ws'
+      // webSocketURL: 'ws://0.0.0.0:3000/ws'
+    }
     //   // // <-- 配置 webSocket 报错的
     //   //   // port: 9000,
     //   //   // open: false,

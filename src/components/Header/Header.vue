@@ -7,10 +7,13 @@
         <!-- 登录入口 -->
         <van-button v-if="headerAttrParams.loginShow" to="/login" class="btn_login">登录</van-button>
         <!-- 头像区域 -->
-        <van-button v-if="headerAttrParams.avatarShow" to="/user" :color="setAvatarColor" class="btn_avatar">Hi</van-button>
+        <van-button v-if="headerAttrParams.avatarShow" to="/user" :color="userInfo.avatarColor" class="btn_avatar">Hi</van-button>
+        <!-- 退出登录 -->
+        <van-button v-if="headerAttrParams.logoutShow" class="btn_logout" @click="logout">退出</van-button>
       </template>
       <template #right>
-        <van-icon name="search" size="24" @click="toSearch" v-if="headerAttrParams.iconShow" />
+        <van-icon name="search" size="24" @click="toSearch" v-if="headerAttrParams.searchShow" />
+        <van-icon name="setting-o" size="22" v-if="headerAttrParams.settingShow" />
       </template>
     </van-nav-bar>
 
@@ -22,7 +25,7 @@
 </template>
 
 <script>
-import { mapState, mapMutations, mapGetters } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import Search from '@/components/Search/Search.vue'
 export default {
   name: 'Header',
@@ -30,17 +33,32 @@ export default {
     return {}
   },
   created() {},
+  mounted() {},
   methods: {
     ...mapMutations(['showSearchPopup', 'getSinglePageKey']),
     // 点击搜索按钮，展开搜索弹出层
     toSearch() {
       // 展示搜索弹出层
       this.showSearchPopup(true)
+    },
+    // 点击退出按钮，退出登录
+    logout() {
+      this.userInfo.avatarColor = ''
+      sessionStorage.removeItem('token')
+      this.$toast.success({
+        message: '退出登录\n成功'
+      })
+      // 触发页面状态展示事件，展示出未登录状态的页面
+      this.getSinglePageKey()
     }
   },
   computed: {
-    ...mapState(['headerAttrParams']),
-    ...mapGetters(['setAvatarColor'])
+    ...mapState(['headerAttrParams', 'userInfo'])
+    // ...mapGetters(['setAvatarColor'])
+    // zhuanghua() {
+    //   const userInfo = this.shareUserInfo()
+    //   return userInfo
+    // }
   },
   components: {
     Search
@@ -61,7 +79,8 @@ export default {
   font-size: 0.42667rem;
 }
 
-.btn_login {
+.btn_login,
+.btn_logout {
   background-color: transparent;
 }
 

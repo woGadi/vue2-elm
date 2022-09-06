@@ -17,7 +17,7 @@
         <div class="slot-form">
           <van-form ref="loginFormRef">
             <!-- 用户名 -->
-            <van-field v-model="loginForm.username" name="username" label="用户名" placeholder="请输入用户名" :rules="loginFormRules.username" :maxlength="13" ref="usernameRef" />
+            <van-field v-model="loginForm.username" name="username" label="用户名" placeholder="请输入用户名" :rules="loginFormRules.username" :maxlength="8" ref="usernameRef" />
             <!-- 密码 -->
             <van-field v-model="loginForm.password" type="password" name="密码" label="密码" placeholder="请输入密码" :rules="loginFormRules.password" :maxlength="18" ref="passwordRef" />
             <!-- 验证码 -->
@@ -26,7 +26,6 @@
             <div class="form-btn">
               <!-- 验证码展示区 -->
               <div class="btn-code">
-                <!-- <img :src="codeImg" alt="" /> -->
                 <Code></Code>
               </div>
               <!-- 注册按钮 -->
@@ -42,44 +41,11 @@
         </div>
       </template>
     </CommonPage>
-
-    <!-- 标题横幅 -->
-    <!-- <div class="banner">
-      <div class="title">
-        <h3>欢迎回来~</h3>
-      </div>
-    </div> -->
-
-    <!-- 公共表单组件 -->
-    <!-- <div class="form-box">
-      表单头部
-      <div class="form-box-header"></div>
-      表单主体
-      <div class="form-box-main">
-        表单
-        <van-form @submit="onSubmit" :show-error-message="false">
-          用户名
-          <van-field v-model="loginForm.username" label="用户名" placeholder="请输入用户名" :rules="loginFormRules.username" />
-          密码
-          <van-field v-model="loginForm.password" type="password" label="密码" placeholder="请输入密码" :rules="[{ required: true, message: '请填写密码' }]" />
-          验证码
-          <van-field v-model="loginForm.digit" type="digit" label="验证码" placeholder="请输入验证码" :rules="[{ required: true, message: '请填写密码' }]">
-            <template #button>
-              <van-button class="validImg"></van-button>
-            </template>
-          </van-field>
-          <div>
-            <van-button round block native-type="submit">登录</van-button>
-          </div>
-        </van-form>
-      </div>
-    </div> -->
   </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from 'vuex'
-// import { setCookie, getCookie } from '@/utils/cookie.js'
 import Code from '@/components/Code/Code.vue'
 import CommonPage from '@/components/CommonPage/CommonPage.vue'
 import HeaderBack from '@/components/HeaderBack/HeaderBack.vue'
@@ -90,15 +56,15 @@ export default {
     return {
       // 登录表单参数
       loginForm: {
-        username: 'asd123', // 用户名
-        password: '123123123', // 密码
+        username: '夏天的风', // 用户名
+        password: 'summer123', // 密码
         code: '' // 验证码
       },
       // 登录表单校验规则
       loginFormRules: {
         username: [
           { required: true, message: '输入用户名喔', trigger: 'onBlur' },
-          { validator: this.usernameValid, message: '长度在 3 到 11 个字符', trigger: 'onBlur' },
+          { validator: this.usernameValid, message: '长度在 3 到 6 个字符', trigger: 'onBlur' },
           { validator: this.usernameExistValid, message: '登录失败，您可能还未注册喔' }
         ],
         password: [
@@ -108,21 +74,18 @@ export default {
         ],
         code: [
           { required: true, message: '输入验证码喔', trigger: 'onBlur' },
-          { validator: this.codeValid, message: '请输入 4 位数验证码', trigger: 'onBlur' }
+          { validator: this.codeValid, message: '请输入 4 位数验证码', trigger: 'onBlur' },
+          { validator: this.codeErrorValid, message: '验证码不正确喔' }
         ]
       },
       // 确认注册返回的信息字符串
-      logValidMessage: '',
-      // 验证码图片路径
-      codeImg: '',
-      // 表单校验信息，此对象的属性均为表单每一项的 name 值
-      validInfo: {}
+      logValidMessage: ''
     }
   },
   created() {},
   mounted() {},
   methods: {
-    ...mapMutations(['getCodeValue']),
+    ...mapMutations(['getCodeValue', 'shareUserInfo']),
     // 表单验证函数
     usernameExistValid() {
       if (this.logValidMessage === '登录失败，您可能还未注册喔') {
@@ -138,8 +101,14 @@ export default {
       }
       return true
     },
+    codeErrorValid() {
+      if (this.loginForm.code !== this.codeValue) {
+        return false
+      }
+      return true
+    },
     usernameValid() {
-      if (this.loginForm.username.length <= 3 || this.loginForm.username.length > 11) {
+      if (this.loginForm.username.length <= 3 || this.loginForm.username.length > 6) {
         return false
       }
       return true
@@ -156,13 +125,6 @@ export default {
       }
       return true
     },
-    // 获取验证码
-    // async getCode() {
-    //   // this.getCanvasEle()
-    //   const res = await getCodeAPI()
-    //   // this.codeImg = res.code
-    //   console.log(res, '获取验证码')
-    // },
     // 登录操作
     postLoginInfo() {
       // 确认登录时，再次进行表单校验
@@ -170,13 +132,13 @@ export default {
         .validate()
         .then(async () => {
           const { data: res } = await postLoginInfoAPI(this.loginForm)
-          // 判断验证码是否输入正确
-          if (this.loginForm.code !== this.codeValue) {
-            res.data = {}
-            res.meta.msg = '验证码不正确喔'
-            res.meta.status = '400'
-            return console.log(res)
-          }
+          // 判断验证码是否输入正确，模拟返回值
+          // if (this.loginForm.code !== this.codeValue) {
+          //   res.data = {}
+          //   res.meta.msg = '验证码不正确喔'
+          //   res.meta.status = '400'
+          //   return console.log(res)
+          // }
           // 判断手机号和用户名是否已注册
           this.logValidMessage = res.message
           // 根据响应回来的数据再次校验表单内容
@@ -186,11 +148,10 @@ export default {
           const token = res.token
           sessionStorage.setItem('token', token)
           // 存储头像背景色值
-          sessionStorage.setItem('avatarColor', res.avatar)
+          this.shareUserInfo(res)
           // 登录成功的轻提示
-          this.$toast({
-            message: '登录成功！',
-            position: 'top'
+          this.$toast.success({
+            message: '登录成功'
           })
           // 登录后跳转 (还需在 router.js 中控制访问权限)
           this.$router.push('/home')
@@ -202,18 +163,7 @@ export default {
   },
   computed: {
     // 共享的验证码的值
-    ...mapState(['codeValue']),
-    getValidInfo() {
-      const usernameRef = this.$refs.usernameRef.name
-      const passwordRef = this.$refs.passwordRef.name
-      const codeRef = this.$refs.codeRef.name
-      const validInfo = {
-        usernameRef,
-        passwordRef,
-        codeRef
-      }
-      return validInfo
-    }
+    ...mapState(['codeValue'])
   },
   components: {
     HeaderBack,
@@ -373,15 +323,4 @@ export default {
     }
   }
 }
-/* .validImg {
-  position: absolute;
-  top: 50%;
-  right: -5%;
-  margin: 0;
-  padding: 0;
-  width: 40%;
-  height: 150%;
-  background-color: #ddd;
-  transform: translate(0, -50%);
-} */
 </style>
