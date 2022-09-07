@@ -29,7 +29,7 @@
       <!-- 推荐店家列表 -->
       <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5">
         <!-- 循环渲染列表的每一项 -->
-        <van-cell v-for="item in storeList" :key="item.id">
+        <van-cell v-for="item in storeList" :key="item.id" @click="toStoreDetails">
           <!-- 店家信息项 -->
           <div class="store_info">
             <!-- 店家信息项左侧图片部分 -->
@@ -175,6 +175,10 @@ export default {
       this.loadListParams.isLoading = true
       this.storeParams.offset += 6
       this.getStoreList()
+    },
+    // 跳转商店详情页面
+    toStoreDetails() {
+      this.$router.push('/store_details')
     }
   }
 }

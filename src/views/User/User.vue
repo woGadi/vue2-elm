@@ -103,7 +103,6 @@ export default {
     async getServiceList() {
       const { data: res } = await getServiceListAPI()
       this.serviceList = res.data
-      console.log(this.serviceList)
     }
   },
   computed: {

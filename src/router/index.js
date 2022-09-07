@@ -6,6 +6,7 @@ import Home from '@/views/Home/Home.vue'
 import Order from '@/views/Order/Order.vue'
 import User from '@/views/User/User.vue'
 import Category from '@/views/Category/Category.vue'
+import StoreDetails from '@/views/StoreDetails/StoreDetails.vue'
 import Login from '@/views/Login/Login.vue'
 import Register from '@/views/Register/Register.vue'
 
@@ -25,7 +26,8 @@ const routes = [
   },
   { path: '/category', component: Category },
   { path: '/login', component: Login },
-  { path: '/register', component: Register }
+  { path: '/register', component: Register },
+  { path: '/store_details', component: StoreDetails }
 ]
 
 const router = new VueRouter({
@@ -34,7 +36,7 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   // 登录页面无需鉴权，直接放行
-  if (to.path === '/login' || to.path === '/register' || to.path === '/home' || to.path === '/category' || to.path === '/user') return next()
+  if (to.path === '/login' || to.path === '/register' || to.path === '/home' || to.path === '/category' || to.path === '/user' || to.path === '/store_details') return next()
   // 访问时无 token，证明未登录，跳回登录页登录
   const tokenStr = sessionStorage.getItem('token')
   if (!tokenStr) return next('/login')
