@@ -8,7 +8,7 @@
       <!-- 搜索展示的店家列表 -->
       <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5" :immediate-check="false" v-if="storeList.length !== 0">
         <!-- 循环渲染列表的每一项 -->
-        <van-cell v-for="item in storeList" :key="item.id">
+        <van-cell v-for="item in storeList" :key="item.id" @click="toStore">
           <!-- 店家信息项 -->
           <div class="store_info">
             <!-- 店家信息项左侧图片部分 -->
@@ -172,6 +172,10 @@ export default {
       // 初始化列表
       this.clearSearchValue()
       this.showSearchPopup(false)
+    },
+    // 跳转商店详情页面
+    toStore() {
+      this.$router.push('/store')
     }
   }
 }

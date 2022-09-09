@@ -29,7 +29,7 @@
       <!-- 推荐店家列表 -->
       <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5">
         <!-- 循环渲染列表的每一项 -->
-        <van-cell v-for="item in storeList" :key="item.id" @click="toStoreDetails">
+        <van-cell v-for="item in storeList" :key="item.id" @click="toStore(item)">
           <!-- 店家信息项 -->
           <div class="store_info">
             <!-- 店家信息项左侧图片部分 -->
@@ -177,8 +177,17 @@ export default {
       this.getStoreList()
     },
     // 跳转商店详情页面
-    toStoreDetails() {
-      this.$router.push('/store_details')
+    toStore(item) {
+      // 将商家信息存入 sessionStorage
+      const storeInfo = {
+        img: item.image_path,
+        name: item.name,
+        rating: item.rating,
+        delivery: item.piecewise_agent_fee.tips
+      }
+      sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
+
+      this.$router.push('/store')
     }
   }
 }

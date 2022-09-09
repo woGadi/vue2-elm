@@ -5,8 +5,7 @@ Vue.use(Vuex)
 
 // 共享的数据
 const state = {
-  // 《店家列表数据》
-
+  // 《首页》
   // 控制搜索弹出层的展示
   searchPopup: false,
 
@@ -26,8 +25,10 @@ const state = {
     // 是否展示退出按钮
     logoutShow: false
   },
+  // 《注册登录页》
   // 4 位验证码
   codeValue: '',
+  // 《用户页》
   // 用户信息，用于页面的按需展示
   userInfo: {
     user_id: 0, // 用户id
@@ -37,6 +38,26 @@ const state = {
 }
 // 处理数据的方法
 const mutations = {
+  // 修改商品页面总金额
+  setStoreAmount(state, params) {
+    // let asd = item.price * (item.initCount + 1)
+    let unitPrice = params.price
+    unitPrice = unitPrice.toFixed(2) - 0
+    // 读取上次合计的总金额
+    let storeAmount = sessionStorage.getItem('storeAmount') - 0
+    // 判断点击按钮是 + 还是 -
+    if (params.type === 'add') {
+      // 追加金额
+      storeAmount = storeAmount + unitPrice
+    } else {
+      // 消减金额
+      storeAmount = storeAmount - unitPrice
+    }
+    console.log(storeAmount.toFixed(2))
+    // 修改并存储总金额
+    sessionStorage.setItem('storeAmount', storeAmount.toFixed(2) + '')
+    console.log(storeAmount.toFixed(2))
+  },
   // 共享登录后返回的用户信息
   shareUserInfo(state, res) {
     state.userInfo.user_id = res.user_id
