@@ -34,10 +34,17 @@ const state = {
     user_id: 0, // 用户id
     username: '', // 用户名
     avatarColor: '' // 头像背景色
-  }
+  },
+  // 《商家页》
+  // 点击提交订单携带的信息
+  submitGoodsOrder: []
 }
 // 处理数据的方法
 const mutations = {
+  // 共享商家页的购物车列表，供订单页使用
+  setSubmitGoodsOrder(state, step) {
+    state.submitGoodsOrder = step
+  },
   // 修改商品页面总金额
   setStoreAmount(state, params) {
     // let asd = item.price * (item.initCount + 1)
@@ -141,13 +148,7 @@ const mutations = {
 // 处理异步操作
 const actions = {}
 // 封装 state 数据后输出
-const getters = {
-  // 设置头像背景颜色
-  // setAvatarColor(state) {
-  //   state.avatarColor = sessionStorage.getItem('avatarColor')
-  //   return state.avatarColor
-  // }
-}
+const getters = {}
 
 export default new Vuex.Store({
   state,

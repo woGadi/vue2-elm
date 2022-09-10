@@ -233,14 +233,41 @@
 
     <!-- 底部页面导航 -->
     <van-goods-action>
-      <van-goods-action-icon icon="cart-o" text="购物车" badge="6" color="#FF9819" />
+      <van-goods-action-icon icon="cart-o" text="购物车" :badge="cartList.length" color="#FF9819" @click="ctrlActionSheet" />
       <div class="count">
         <h3>
           ￥{{ amountPre }}.<span>{{ amountSuf }}</span>
         </h3>
       </div>
-      <van-goods-action-button text="提交订单" color="#0063b1" />
+      <van-goods-action-button text="提交订单" color="#0063b1" @click="sendCartList" />
     </van-goods-action>
+
+    <!-- 购物车动作面板 -->
+    <van-action-sheet v-model="showActionSheet" title="看看购物车...">
+      <div class="cart">
+        <van-list>
+          <van-cell v-for="item in cartList" :key="item.id">
+            <div class="cart-goods">
+              <div class="cart-goods-img">
+                <img :src="item.img_path" />
+              </div>
+              <div class="cart-goods-text">
+                <div class="name">
+                  <h3>{{ item.name }}</h3>
+                </div>
+                <div class="price">
+                  <h3>￥{{ item.price }}</h3>
+                  <div class="opt">
+                    <van-stepper v-model="item.initCount" theme="round" button-size="20" disable-input min="0" @plus="addGoodsCount(item)" @minus="subGoodsCount(item)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </van-cell>
+        </van-list>
+      </div>
+    </van-action-sheet>
+
     <!-- <van-goods-action>
       <van-goods-action-icon icon="chat-o" text="客服" color="green" />
       <van-goods-action-icon icon="cart-o" text="购物车" badge="6" color="#FF9819" />
@@ -273,7 +300,11 @@ export default {
       // 商品总金额整数部分
       amountPre: 0,
       // 商品总金额小数部分
-      amountSuf: 0
+      amountSuf: 0,
+      // 控制动作面板的展示与隐藏
+      showActionSheet: false,
+      // 购物车列表
+      cartList: []
     }
   },
   created() {
@@ -281,16 +312,6 @@ export default {
     this.getGoodsList()
     sessionStorage.setItem('storeAmount', '0')
     this.getAmountSuf()
-  },
-  mounted() {
-    this.$nextTick(() => {
-      setTimeout(() => {
-        const goodsBrowse = document.getElementById('goods-browse')
-        // this.target = goodsNav.offsetTop
-        const target = goodsBrowse.offsetTop
-        console.log(target)
-      })
-    })
   },
   methods: {
     // 获取商家信息
@@ -309,17 +330,7 @@ export default {
       this.goodsListFourth = res.data_4
       this.goodsListFifth = res.data_5
       this.goodsListSixth = res.data_6
-      console.log(this.goodsListFirst, 1)
-      console.log(this.goodsListSecond, 2)
-      console.log(this.goodsListThird, 3)
-      console.log(this.goodsListFourth, 4)
-      console.log(this.goodsListFifth, 5)
-      console.log(this.goodsListSixth, 6)
     },
-    // 商品侧边导航切换
-    // goodsNavChange(index) {
-    //   this.activeIndex = index
-    // },
     // 商品列表跟随侧边导航跳转
     goodsListChange(index) {
       document.getElementById(`goods-cate${index}`).scrollIntoView()
@@ -335,6 +346,8 @@ export default {
       this.$store.commit('setStoreAmount', addParams)
       this.getAmountPre()
       this.getAmountSuf()
+      // 购物车面板逻辑
+      this.addGoodsCart(item)
     },
     // 点击-号时，商品页面总金额变化
     subGoodsCount(item) {
@@ -345,6 +358,8 @@ export default {
       this.$store.commit('setStoreAmount', subParams)
       this.getAmountPre()
       this.getAmountSuf()
+      // 购物车面板逻辑
+      this.subGoodsCart(item)
     },
     // 获取商品总金额整数部分
     getAmountPre() {
@@ -354,6 +369,47 @@ export default {
     getAmountSuf() {
       let amountSuf = sessionStorage.getItem('storeAmount').slice(-2) - 0
       this.amountSuf = amountSuf < 10 ? '0' + amountSuf : amountSuf
+    },
+    // 控制动作面板的展示与隐藏
+    ctrlActionSheet() {
+      this.showActionSheet = !this.showActionSheet
+    },
+    // 点击 + 按钮，获取购物车商品渲染所需的信息
+    addGoodsCart(item) {
+      // 购物车面板逻辑
+      // 找到重复项返回 true
+      const repeatItem = this.cartList.some((x) => x.id === item.id)
+      if (repeatItem) {
+        // 找到重复项在数组中的位置
+        const repeatItemIndex = this.cartList.findIndex((i) => i.id === item.id)
+        console.log(repeatItemIndex, 'ceshi')
+        // 重复项无需 push 进数组，而是更新一下重复项数据即可
+        this.cartList.splice(repeatItemIndex, 1, item)
+        return console.log(this.cartList)
+      }
+      // 将新的项 push 进数组
+      this.cartList.push(item)
+    },
+    // 点击 - 按钮，当选择商品数量为 0 时，将此商品移出购物车
+    subGoodsCart(item) {
+      if (item.initCount - 1 === 0) {
+        const itemIndex = this.cartList.findIndex((i) => i.id === item.id)
+        this.cartList.splice(itemIndex, 1)
+        item.initCount = 0
+      }
+    },
+    // 点击提交订单按钮，将购物车列表传给 vuex，让其共享给订单页
+    sendCartList() {
+      if (this.cartList.length === 0) {
+        return this.$toast({
+          message: '购物车空空如也~',
+          position: 'bottom'
+        })
+      }
+      this.$store.commit('setSubmitGoodsOrder', this.cartList)
+      this.$toast.success({
+        message: '提交订单成功~'
+      })
     }
     // 上面
   },
@@ -626,6 +682,12 @@ export default {
 //   }
 // }
 
+// 商家页底部导航
+.van-goods-action {
+  box-shadow: 0 -1px 10px #ddd;
+  z-index: 3;
+}
+
 .count {
   padding: 0 22px;
   width: 34%;
@@ -650,7 +712,86 @@ export default {
   letter-spacing: 2px;
 }
 
-.van-goods-action {
-  box-shadow: 0 -1px 10px #ddd;
+// 购物车动作面板
+.van-action-sheet {
+  // box-shadow: 0 -1px 10px #bbb;
+  z-index: 2 !important;
+  .van-action-sheet__header {
+    padding-left: 30px;
+    color: #999;
+    font-size: 30px;
+    font-weight: 700;
+    text-align: left;
+    letter-spacing: 2px;
+  }
+  .van-action-sheet__content {
+    padding-bottom: 126px;
+    .cart {
+      max-height: 360px;
+      background-color: #eee;
+      overflow: scroll;
+      .van-cell {
+        margin: 1px 0;
+        padding: 20px 60px;
+      }
+      .cart-goods {
+        display: flex;
+        height: 110px;
+        .cart-goods-img {
+          flex: 2;
+          // background-color: pink;
+          img {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+          }
+        }
+        .cart-goods-text {
+          flex: 9;
+          display: flex;
+          // background-color: green;
+          .name {
+            padding: 0 10px 0 20px;
+            // background-color: orange;
+            line-height: 3.1;
+            text-align: center;
+            h3 {
+              font-size: 32px;
+              font-weight: 700;
+            }
+          }
+          .price {
+            flex: 7;
+            display: flex;
+            // background-color: skyblue;
+            align-items: center;
+            justify-content: space-between;
+            h3 {
+              font-size: 30px;
+              color: #ffa500;
+            }
+            .opt {
+              padding: 0 0 10px 0;
+              border-bottom: 1px dashed #ccc;
+              .van-stepper {
+                padding: 10px 0 0 0;
+                /deep/ .van-stepper__input {
+                  width: 50px;
+                  font-size: 30px;
+                  font-weight: 700;
+                  color: #333;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+// 动作面板遮罩层
+/deep/ .van-overlay {
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2 !important;
 }
 </style>

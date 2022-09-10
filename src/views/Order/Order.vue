@@ -11,6 +11,7 @@ export default {
   created() {
     this.setSinglePageKey()
     this.getSinglePageKey()
+    this.getSubmitGoodsOrder()
   },
   methods: {
     ...mapMutations(['getSinglePageKey']),
@@ -18,6 +19,10 @@ export default {
     setSinglePageKey() {
       sessionStorage.removeItem('singlePageKey')
       sessionStorage.setItem('singlePageKey', 'Order')
+    },
+    // 拿到商家页，用户点击提交订单，携带过来的商品订单信息
+    getSubmitGoodsOrder() {
+      return console.log(this.$store.state.submitGoodsOrder)
     }
   }
 }
