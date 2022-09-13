@@ -37,13 +37,122 @@ const state = {
   },
   // 《商家页》
   // 点击提交订单携带的信息
-  submitGoodsOrder: []
+  // submitGoodsOrder: []
+  // 商家页的 id，用于请求对应页面数据，和跳转对应商家页
+  storeId: 0,
+  // 商品总金额整数部分
+  amountPre: 0,
+  // 商品总金额小数部分
+  amountSuf: 0,
+  // 《订单页》
+  // 未支付的订单列表
+  orderList: [],
+  // 订单列表的每一项
+  orderListItem: {},
+  // 自定义订单列表每一项的 id
+  id: 1,
+  // 合计
+  orderAmount: 0,
+  // 已支付的订单列表
+  paidOrderList: []
 }
 // 处理数据的方法
 const mutations = {
+  // 清空已支付的订单
+  clearPaid(state) {
+    state.paidOrderList = []
+    setTimeout(() => {
+      location.reload()
+    }, 1000)
+  },
+  // 清空未支付的订单
+  clearUnpaid(state) {
+    state.orderList = []
+    state.orderAmount = 0
+    // 重新加载页面
+    setTimeout(() => {
+      location.reload()
+    }, 1000)
+  },
+  // 将未支付列表展开，逐一加入到已支付列表中
+  setPaidOrderList(state, step) {
+    state.paidOrderList.push(...step)
+  },
+  // 取消订单时，合计相应减少
+  subOrderAmount(state, step) {
+    const subResult = state.orderAmount - step
+    // state.orderAmount = 0
+    // toFixed 返回值是 string？ 还是 js 隐式类型转换？
+    state.orderAmount = subResult.toFixed(2) - 0
+    console.log(typeof state.orderAmount)
+  },
+  // 存储商家的 id
+  setStoreId(state, step) {
+    state.storeId = step
+  },
+  // 将生成的订单每一项加入到列表中，生成订单列表
+  setOrderList(state) {
+    state.orderList.push(state.orderListItem)
+  },
   // 共享商家页的购物车列表，供订单页使用
-  setSubmitGoodsOrder(state, step) {
-    state.submitGoodsOrder = step
+  prodOrderData(state, step) {
+    // 提交商品的名称数组
+    const goodsName = []
+    // 提交商品的数量数组
+    const goodsInitCount = []
+    step.forEach((item) => {
+      // 将提交的商品数据放入数组
+      goodsName.push(item.name)
+      goodsInitCount.push(item.initCount)
+    })
+    // 提交的商品数据
+    const goodsData = {
+      goods_name: goodsName,
+      goods_init_count: goodsInitCount
+    }
+    // 拿到商家信息对象
+    const storeInfo = JSON.parse(sessionStorage.getItem('storeInfo'))
+    // 订单列表的每一项，供订单页渲染
+    const orderListItem = {
+      id: state.id,
+      goods_data: goodsData,
+      store_img: storeInfo.img,
+      store_name: storeInfo.name,
+      store_rating: storeInfo.rating,
+      store_delivery: storeInfo.delivery,
+      store_amount: sessionStorage.getItem('storeAmount') - 0,
+      // 商家id，用于根据id，跳转对应商家页面
+      store_id: state.storeId
+    }
+    // 每提交一次，订单项 id 自增
+    state.id++
+    // 累加订单项的金额
+    state.orderAmount += sessionStorage.getItem('storeAmount') - 0
+    state.orderListItem = orderListItem
+    return console.log(state.orderListItem)
+  },
+  // 获取商品总金额整数部分
+  getAmountPre(state, step) {
+    // 总金额有：商家页的总金额、订单页的总金额
+    if (step === 'store') {
+      state.amountPre = sessionStorage.getItem('storeAmount').slice(0, -3) - 0
+    } else {
+      const orderAmount = state.orderAmount.toFixed(2) + ''
+      // 默认的数值0不保留2位小数，因此 slice 截取不到 3 位后的字符，只有0一个字符；给 - 0 隐式转换即可。
+      state.amountPre = orderAmount.slice(0, -3) - 0
+    }
+  },
+  // 获取商品总金额小数部分
+  getAmountSuf(state, step) {
+    if (step === 'store') {
+      let amountSuf = sessionStorage.getItem('storeAmount').slice(-2) - 0
+      // 保持总金额小数部分的 2 位数
+      state.amountSuf = amountSuf < 10 ? '0' + amountSuf : amountSuf
+    } else {
+      const orderAmount = state.orderAmount.toFixed(2) + ''
+      let amountSuf = orderAmount.slice(-2) - 0
+      state.amountSuf = amountSuf < 10 ? '0' + amountSuf : amountSuf
+    }
   },
   // 修改商品页面总金额
   setStoreAmount(state, params) {

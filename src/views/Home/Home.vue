@@ -186,8 +186,9 @@ export default {
         delivery: item.piecewise_agent_fee.tips
       }
       sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
-
-      this.$router.push('/store')
+      // 将商家 id，共享给订单页商家跳转使用
+      this.$store.commit('setStoreId', item.id)
+      this.$router.push({ path: '/store', query: { store_id: item.id } })
     }
   }
 }
@@ -201,6 +202,10 @@ export default {
 }
 
 // !important 覆盖不生效，用 /deep/
+/deep/ .van-icon__image {
+  border-radius: 15px;
+}
+
 /deep/ .van-swipe__indicators {
   bottom: 5px;
 }

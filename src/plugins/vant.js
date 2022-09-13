@@ -32,7 +32,8 @@ import {
   SidebarItem,
   Sticky,
   Stepper,
-  ActionSheet
+  ActionSheet,
+  Dialog
 } from 'vant'
 
 Vue.use(Button)
@@ -65,3 +66,4 @@ Vue.use(SidebarItem)
 Vue.use(Sticky)
 Vue.use(Stepper)
 Vue.use(ActionSheet)
+Vue.use(Dialog)

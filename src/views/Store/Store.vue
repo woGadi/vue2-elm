@@ -44,7 +44,6 @@
     <!-- 商品侧边导航 -->
     <div class="goods-nav">
       <van-sidebar v-model="activeKey">
-        <!-- @change="goodsNavChange" -->
         <van-sidebar-item title="热销商品" @click="goodsListChange" />
         <van-sidebar-item title="快餐" @click="goodsListChange" />
         <van-sidebar-item title="家常菜" @click="goodsListChange" />
@@ -274,10 +273,23 @@
       <van-goods-action-icon icon="like-o" text="收藏" color="red" />
       <van-goods-action-button text="放入购物车" color="#0063b1" />
     </van-goods-action> -->
+
+    <!-- 提交订单前的确认对话框 -->
+    <van-dialog v-model="showConfirmDialog" title="请确认收货信息" :show-cancel-button="true" @confirm="confirmDialog">
+      <div class="msg">
+        <div class="msg-mobile">
+          <p>联系电话：18968688668</p>
+        </div>
+        <div class="msg-address">
+          <p>收货地址：快乐星球开心王国知足常乐小区</p>
+        </div>
+      </div>
+    </van-dialog>
   </div>
 </template>
 
 <script>
+import { mapState, mapMutations } from 'vuex'
 import { getGoodsListAPI } from '@/apis/storeAPI.js'
 import HeaderBack from '@/components/HeaderBack/HeaderBack.vue'
 import CommonPage from '@/components/CommonPage/CommonPage.vue'
@@ -297,23 +309,23 @@ export default {
       goodsListFourth: [],
       goodsListFifth: [],
       goodsListSixth: [],
-      // 商品总金额整数部分
-      amountPre: 0,
-      // 商品总金额小数部分
-      amountSuf: 0,
       // 控制动作面板的展示与隐藏
       showActionSheet: false,
       // 购物车列表
-      cartList: []
+      cartList: [],
+      // 控制确认订单对话框的展示与隐藏
+      showConfirmDialog: false
     }
   },
   created() {
     this.getStoreInfo()
     this.getGoodsList()
     sessionStorage.setItem('storeAmount', '0')
-    this.getAmountSuf()
+    this.getAmountPre('store')
+    this.getAmountSuf('store')
   },
   methods: {
+    ...mapMutations(['getAmountPre', 'getAmountSuf']),
     // 获取商家信息
     getStoreInfo() {
       const storeInfo = JSON.parse(sessionStorage.getItem('storeInfo'))
@@ -322,7 +334,9 @@ export default {
     },
     // 获取商品列表
     async getGoodsList() {
-      const { data: res } = await getGoodsListAPI()
+      // 拿到首页推荐商家项的 id，根据 id 获取对应商家页的商品列表
+      const storeId = this.$store.state.storeId
+      const { data: res } = await getGoodsListAPI(storeId)
       // 商品分类列表，共6类
       this.goodsListFirst = res.data_1
       this.goodsListSecond = res.data_2
@@ -344,8 +358,8 @@ export default {
         price: item.price
       }
       this.$store.commit('setStoreAmount', addParams)
-      this.getAmountPre()
-      this.getAmountSuf()
+      this.getAmountPre('store')
+      this.getAmountSuf('store')
       // 购物车面板逻辑
       this.addGoodsCart(item)
     },
@@ -356,20 +370,12 @@ export default {
         price: item.price
       }
       this.$store.commit('setStoreAmount', subParams)
-      this.getAmountPre()
-      this.getAmountSuf()
+      this.getAmountPre('store')
+      this.getAmountSuf('store')
       // 购物车面板逻辑
       this.subGoodsCart(item)
     },
-    // 获取商品总金额整数部分
-    getAmountPre() {
-      this.amountPre = sessionStorage.getItem('storeAmount').slice(0, -3) - 0
-    },
-    // 获取商品总金额小数部分
-    getAmountSuf() {
-      let amountSuf = sessionStorage.getItem('storeAmount').slice(-2) - 0
-      this.amountSuf = amountSuf < 10 ? '0' + amountSuf : amountSuf
-    },
+
     // 控制动作面板的展示与隐藏
     ctrlActionSheet() {
       this.showActionSheet = !this.showActionSheet
@@ -398,20 +404,36 @@ export default {
         item.initCount = 0
       }
     },
-    // 点击提交订单按钮，将购物车列表传给 vuex，让其共享给订单页
+    // 点击提交订单按钮，符合发送条件并确认信息后，传递购物车列表给 vuex
     sendCartList() {
+      if (!sessionStorage.getItem('token')) {
+        return this.$toast({
+          message: '您还未登录呢~',
+          position: 'bottom'
+        })
+      }
       if (this.cartList.length === 0) {
         return this.$toast({
           message: '购物车空空如也~',
           position: 'bottom'
         })
       }
-      this.$store.commit('setSubmitGoodsOrder', this.cartList)
+      // 提交前确认收货信息
+      this.showConfirmDialog = true
+    },
+    // 点击确定按钮，确认收货信息，将购物车列表传给 vuex，让其共享给订单页
+    confirmDialog() {
+      // 将购物车列表传给 vuex
+      this.$store.commit('prodOrderData', this.cartList)
       this.$toast.success({
         message: '提交订单成功~'
       })
+      // 生成订单列表，将订单每一项加入到订单列表中
+      this.$store.commit('setOrderList')
     }
-    // 上面
+  },
+  computed: {
+    ...mapState(['amountPre', 'amountSuf'])
   },
   components: {
     HeaderBack,
@@ -523,7 +545,7 @@ export default {
     letter-spacing: 3px;
   }
 }
-// 这里
+
 @goods-nav-height: 83%;
 // @goods-nav-height: 960px;
 .goods-nav {
@@ -791,7 +813,36 @@ export default {
 }
 // 动作面板遮罩层
 /deep/ .van-overlay {
-  background-color: rgba(0, 0, 0, 0.5);
+  // background-color: rgba(0, 0, 0, 0.5);
   z-index: 2 !important;
+}
+// 确认弹出框样式
+/deep/ .van-dialog {
+  padding: 0 20px;
+  width: 66%;
+  box-sizing: border-box;
+  .van-dialog__header {
+    padding: 30px 0 10px 0;
+  }
+}
+.msg {
+  display: flex;
+  padding: 20px 46px 30px;
+  // background-color: #eee;
+  border-top: 1px dashed #ccc;
+  border-bottom: 1px dashed #ccc;
+  flex-direction: column;
+  box-sizing: border-box;
+  .msg-mobile {
+    // background-color: pink;
+    line-height: 48px;
+  }
+  .msg-address {
+    // background-color: orange;
+    line-height: 1.5;
+  }
+  p {
+    font-size: 32px;
+  }
 }
 </style>

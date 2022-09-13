@@ -42,11 +42,11 @@
     <div class="service">
       <div class="list">
         <div class="list-cell">
-          <p class="left"><van-icon name="records" color="#99C78E" />{{ serviceList.order }}</p>
+          <p class="left"><van-icon name="paid" color="brown" />{{ serviceList.pay }}</p>
           <p class="right">›</p>
         </div>
         <div class="list-cell">
-          <p class="left"><van-icon name="paid" color="brown" />{{ serviceList.pay }}</p>
+          <p class="left"><van-icon name="records" color="#99C78E" />{{ serviceList.order }}</p>
           <p class="right">›</p>
         </div>
         <div class="list-cell">

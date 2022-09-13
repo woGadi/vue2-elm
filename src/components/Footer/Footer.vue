@@ -18,5 +18,6 @@ export default {
 <style lang="less" scoped>
 .van-tabbar {
   box-shadow: 0 -1px 10px #ccc;
+  z-index: 2;
 }
 </style>
