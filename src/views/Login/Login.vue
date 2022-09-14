@@ -82,10 +82,17 @@ export default {
       logValidMessage: ''
     }
   },
-  created() {},
+  created() {
+    this.setPageKey()
+  },
   mounted() {},
   methods: {
     ...mapMutations(['getCodeValue', 'shareUserInfo']),
+    // 设置验证“非单页面”身份的键
+    setPageKey() {
+      sessionStorage.removeItem('pageKey')
+      sessionStorage.setItem('pageKey', 'Login')
+    },
     // 表单验证函数
     usernameExistValid() {
       if (this.logValidMessage === '登录失败，您可能还未注册喔') {

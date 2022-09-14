@@ -11,12 +11,17 @@ export default {
   data() {
     return {}
   },
-  created() {},
   methods: {
     // 返回上一页面
     goBack() {
       // 返回时清除存储的标题
       // sessionStorage.removeItem('cateTitle')
+      // 解决了注册和登录页不能直接返回首页的问题
+      const pageKey = sessionStorage.getItem('pageKey')
+      if (pageKey === 'Register' || pageKey === 'Login') {
+        this.$router.push('/home')
+        return sessionStorage.removeItem('pageKey')
+      }
       // 返回上一页面
       this.$router.back()
     }

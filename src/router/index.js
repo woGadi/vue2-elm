@@ -37,7 +37,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // 登录页面无需鉴权，直接放行
+  // 无需鉴权，直接放行的页面
   if (to.path === '/login' || to.path === '/register' || to.path === '/home' || to.path === '/category' || to.path === '/user' || to.path === '/store') return next()
   // 访问时无 token，证明未登录，跳回登录页登录
   const tokenStr = sessionStorage.getItem('token')

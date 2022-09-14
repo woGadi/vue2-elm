@@ -211,6 +211,8 @@ const mutations = {
   showSearchPopup(state, step) {
     state.searchPopup = step
   },
+  // 获取验证“非单页面”身份的键（待开发）
+  // getPageKey(state) {},
   // 获取验证“单页面”身份的键
   getSinglePageKey(state) {
     const singlePageKey = sessionStorage.getItem('singlePageKey')

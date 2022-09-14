@@ -89,10 +89,17 @@ export default {
       regValidMessage: ''
     }
   },
-  created() {},
+  created() {
+    this.setPageKey()
+  },
   mounted() {},
   methods: {
     ...mapMutations(['getCodeValue']),
+    // 设置验证“非单页面”身份的键
+    setPageKey() {
+      sessionStorage.removeItem('pageKey')
+      sessionStorage.setItem('pageKey', 'Register')
+    },
     // 表单验证函数
     mobileExistValid() {
       if (this.regValidMessage === '该手机号已注册') {
