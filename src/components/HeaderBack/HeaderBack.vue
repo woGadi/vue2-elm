@@ -16,9 +16,9 @@ export default {
     // 返回上一页面
     goBack() {
       // 返回时清除存储的标题
-      sessionStorage.removeItem('cateTitle')
-      // 返回目标路径
-      this.$router.push('/home')
+      // sessionStorage.removeItem('cateTitle')
+      // 返回上一页面
+      this.$router.back()
     }
   }
 }

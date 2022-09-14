@@ -24,7 +24,7 @@
 
     <!-- 用户浏览历史等区域 -->
     <div class="header">
-      <div class="history">
+      <div class="history" @click="toFootPrintPage">
         <van-icon name="bag-o" color="#089CFF" />
         <p>{{ serviceList.footprint }}</p>
       </div>
@@ -103,6 +103,10 @@ export default {
     async getServiceList() {
       const { data: res } = await getServiceListAPI()
       this.serviceList = res.data
+    },
+    // 跳转到浏览历史页面
+    toFootPrintPage() {
+      this.$router.push('/foot_print')
     }
   },
   computed: {

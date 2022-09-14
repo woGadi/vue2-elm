@@ -26,7 +26,7 @@
     <!-- 美食类型的店家列表 -->
     <van-list v-model="loadListParams.loading" :finished="loadListParams.finished" finished-text="我是有底线的！" @load="loadStoreList" offset="5" :immediate-check="false" v-if="storeList.length !== 0">
       <!-- 循环渲染列表的每一项 -->
-      <van-cell v-for="item in storeList" :key="item.id">
+      <van-cell v-for="item in storeList" :key="item.id" @click="toStore(item)">
         <!-- 店家信息项 -->
         <div class="store_info">
           <!-- 店家信息项左侧图片部分 -->
@@ -141,6 +141,22 @@ export default {
       // 拿到列表的下5项数据
       this.storeParams.offset += 6
       this.getStoreList()
+    },
+    // 跳转商店详情页面
+    toStore(item) {
+      // 将商家信息存入 sessionStorage
+      const storeInfo = {
+        img: item.image_path,
+        name: item.name,
+        rating: item.rating,
+        delivery: item.piecewise_agent_fee.tips
+      }
+      sessionStorage.setItem('storeInfo', JSON.stringify(storeInfo))
+      // 将商家 id，共享给订单页商家跳转使用
+      this.$store.commit('setStoreId', item.id)
+      this.$router.push({ path: '/store', query: { store_id: item.id } })
+      // 将浏览的 item 项，共享给足迹页面
+      this.$store.commit('setFootPrintList', item)
     }
   },
   components: {

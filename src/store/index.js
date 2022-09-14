@@ -54,10 +54,23 @@ const state = {
   // 合计
   orderAmount: 0,
   // 已支付的订单列表
-  paidOrderList: []
+  paidOrderList: [],
+  // 《足迹页》
+  // 足迹列表数据
+  footPrintList: []
 }
 // 处理数据的方法
 const mutations = {
+  // 清空足迹列表
+  clearFootPrint(state) {
+    console.log(123)
+    state.footPrintList = []
+    location.reload()
+  },
+  // 将其他页面传来的商家列表项，组成足迹页列表的每一项
+  setFootPrintList(state, step) {
+    state.footPrintList.unshift(step)
+  },
   // 清空已支付的订单
   clearPaid(state) {
     state.paidOrderList = []

@@ -189,6 +189,8 @@ export default {
       // 将商家 id，共享给订单页商家跳转使用
       this.$store.commit('setStoreId', item.id)
       this.$router.push({ path: '/store', query: { store_id: item.id } })
+      // 将浏览的 item 项，共享给足迹页面
+      this.$store.commit('setFootPrintList', item)
     }
   }
 }

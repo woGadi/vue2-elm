@@ -1,7 +1,9 @@
 <template>
   <div class="order-container">
     <!-- 轮播框架包裹：未支付、已支付订单列表 -->
-    <van-swipe :class="{ 'swipe-fixed-height': isFixed }" :loop="false" :show-indicators="false" ref="orderSwipeRef" @change="orderSwipeChange">
+    <van-swipe :loop="false" :show-indicators="false" ref="orderSwipeRef" @change="orderSwipeChange" id="van-swipe">
+      <!-- 轮播框架的高度是否固定？《第一种解决方案》 -->
+      <!-- <van-swipe-item :class="{ 'swipe-fixed-height': isFixedUnpaid }"> -->
       <van-swipe-item>
         <!-- 未支付的订单列表 -->
         <div class="order-list" ref="orderListRef" v-if="orderList.length">
@@ -40,7 +42,7 @@
       </van-swipe-item>
       <van-swipe-item>
         <!-- 已支付的订单列表 -->
-        <div class="order-list" ref="orderListRef" v-if="paidOrderList.length">
+        <div class="order-list" ref="paidOrderListRef" v-if="paidOrderList.length">
           <van-list>
             <van-cell v-for="item in paidOrderList" :key="item.id">
               <div class="order-item">
@@ -136,7 +138,8 @@ export default {
       // 未支付的订单列表
       orderList: this.$store.state.orderList,
       // 控制轮播框架的高度是否固定
-      isFixed: false,
+      isFixedUnpaid: false, // 未支付页
+      isFixedPaid: false, // 已支付页
       // 轮播项的索引
       swipeItemIndex: 0,
       // 已支付的订单列表
@@ -154,7 +157,11 @@ export default {
   },
   mounted() {
     this.ctrlActionSheet()
-    this.setIsFixed()
+    // this.setIsFixedUnpaid()
+    // this.setIsFixedPaid()
+    // 刷新页面时，判断轮播框架是否固定高度
+    this.fixedSwipeHeight(0)
+    this.releaseSwipeHeight(0)
   },
   methods: {
     ...mapMutations(['getSinglePageKey', 'getAmountPre', 'getAmountSuf']),
@@ -186,17 +193,28 @@ export default {
       // 跳转时携带商家 id，根据 id 渲染对应商家内容
       this.$router.push({ path: '/store', query: { store_id: item.store_id } })
     },
-    // 设置轮播框架的高度是否固定。
-    setIsFixed() {
-      if (this.orderList.length) {
-        // 当订单列表高度超过 “一个页面高度” 时，轮播框架高度就不需要固定了
-        this.isFixed = this.$refs.orderListRef.clientHeight < 491.125
-        console.log(this.isFixed, '轮播框架是否要固定高度')
-      } else {
-        // 订单列表为空时，要保持轮播滑动，就要保持轮播框架有高度
-        this.isFixed = !this.orderList.length
-      }
-    },
+    // 轮播框架的高度是否固定？《第一种解决方案》
+    // // 设置轮播框架的高度是否固定。
+    // setIsFixedUnpaid() {
+    //   if (this.orderList.length) {
+    //     // 当订单列表高度超过 “一个页面高度” 时，轮播框架高度就不需要固定了
+    //     this.isFixedUnpaid = this.$refs.orderListRef.clientHeight < 491.125
+    //     console.log(this.isFixedUnpaid, '未支付轮播框架是否要固定高度')
+    //   } else {
+    //     // 订单列表为空时，要保持轮播滑动，就要保持轮播框架有高度
+    //     this.isFixedUnpaid = !this.orderList.length
+    //   }
+    // },
+    // setIsFixedPaid() {
+    //   if (this.paidOrderList.length) {
+    //     // 当订单列表高度超过 “一个页面高度” 时，轮播框架高度就不需要固定了
+    //     this.isFixedPaid = this.$refs.paidOrderListRef.clientHeight < 491.125
+    //     console.log(this.isFixedPaid, '已支付轮播框架是否要固定高度')
+    //   } else {
+    //     // 订单列表为空时，要保持轮播滑动，就要保持轮播框架有高度
+    //     this.isFixedPaid = !this.paidOrderList.length
+    //   }
+    // },
     // 取消订单
     cancelOrder(item) {
       this.$dialog
@@ -214,7 +232,9 @@ export default {
             // 合计减去取消的数额
             this.$store.commit('subOrderAmount', item.store_amount)
             // 刷新页面，相减结果赋值后渲染
-            location.reload()
+            setTimeout(() => {
+              location.reload()
+            }, 1000)
           }
         })
         .catch((err) => err)
@@ -235,8 +255,10 @@ export default {
         this.showPayPopup = true
         // 通过轮播项索引，可判断当前是哪一项。不延迟赋值的话，文字就会先于弹出层改变。
         this.swipeItemIndex = index
-        console.log(this.swipeItemIndex)
       }, 500)
+      // 利用切换时，index 变化的特点；调用以下两个函数，判断轮播框架是否需要固定高度。
+      this.fixedSwipeHeight(index)
+      this.releaseSwipeHeight(index)
     },
     // 支付订单商品
     payOrderGoods() {
@@ -274,6 +296,24 @@ export default {
       return this.$toast.success({
         message: '已清空~'
       })
+    },
+    // 轮播框架的高度是否固定？《第二种解决方案》
+    // 固定轮播框架的高度
+    fixedSwipeHeight(index) {
+      const swipe = document.getElementById('van-swipe')
+      // 每次切换，判断 van-list 元素的长度，小于一定长度就要固定轮播框架的高度；大于一定长度就不固定长度。
+      // 若不固定，两个长度不一样的 swipe-item 项，就会相互影响。
+      if (swipe.children[0].children[index].children[0].children[0].children.length < 5 + 1) {
+        swipe.style.height = '100%'
+      }
+    },
+    // 释放轮播框架的高度
+    releaseSwipeHeight(index) {
+      const swipe = document.getElementById('van-swipe')
+
+      if (swipe.children[0].children[index].children[0].children[0].children.length > 5) {
+        swipe.style.height = ''
+      }
     }
   },
   computed: {
@@ -291,11 +331,12 @@ export default {
   box-sizing: border-box;
 }
 
-// 轮播框架固定高度的样式
-.swipe-fixed-height {
-  height: 100%;
-  // background-color: pink;
-}
+// 已有第二种解决方案代替
+// 轮播框架固定高度的样式 （第一种解决方案）
+// .swipe-fixed-height {
+//   // height: 981px;
+//   background-color: pink;
+// }
 
 // 订单列表
 .order-list {

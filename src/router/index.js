@@ -9,6 +9,7 @@ import Category from '@/views/Category/Category.vue'
 import Store from '@/views/Store/Store.vue'
 import Login from '@/views/Login/Login.vue'
 import Register from '@/views/Register/Register.vue'
+import FootPrint from '@/views/FootPrint/FootPrint.vue'
 
 Vue.use(VueRouter)
 
@@ -27,7 +28,8 @@ const routes = [
   { path: '/category', component: Category },
   { path: '/login', component: Login },
   { path: '/register', component: Register },
-  { path: '/store', component: Store }
+  { path: '/store', component: Store },
+  { path: '/foot_print', component: FootPrint }
 ]
 
 const router = new VueRouter({
