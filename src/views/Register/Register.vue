@@ -119,7 +119,7 @@ export default {
       return true
     },
     codeErrorValid() {
-      if (this.loginForm.code !== this.codeValue) {
+      if (this.registerForm.code !== this.codeValue) {
         return false
       }
       return true
